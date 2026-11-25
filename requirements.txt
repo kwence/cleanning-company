@@ -1,0 +1,2 @@
+# Cleaning company management app (Django + Bootstrap 5)
+Django>=5.1,<5.3

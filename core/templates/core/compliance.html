@@ -1,0 +1,89 @@
+{% extends "core/base.html" %}
+
+{% block page_title %}UK Compliance{% endblock %}
+{% block page_subtitle %}Mandatory checks and safety controls for a UK cleaning business{% endblock %}
+{% block page_content %}
+<div class="panel mb-3">
+  <div class="panel-body">
+    <div class="alert alert-warning soft-alert mb-0">
+      <strong>Important:</strong> This page provides operational record-keeping support, not legal advice. Requirements depend on your contracts, sites (e.g., schools/care), workers, and chemicals/equipment used. Verify with HSE/Home Office/HMRC guidance or a qualified adviser.
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="panel h-100"><div class="panel-head"><div><h3 class="panel-title">Right to work (Home Office)</h3><p class="panel-sub">Before employment starts</p></div></div>
+      <div class="panel-body">
+        <ul>
+          <li>Carry out right-to-work checks for every employee before work starts; keep records and follow-up checks for time-limited permission.</li>
+          <li>Do not employ a person who does not have the right to do the work offered.</li>
+          <li>Use compliant check methods (original documents or Home Office online check/share code where applicable).</li>
+        </ul>
+        <a href="{% url 'employee_list' %}" class="btn btn-outline-purple btn-sm">Manage employee RTW records</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="panel h-100"><div class="panel-head"><div><h3 class="panel-title">DBS checks</h3><p class="panel-sub">Role/site dependent</p></div></div>
+      <div class="panel-body">
+        <ul>
+          <li>DBS checks are <strong>not universally mandatory</strong> for all cleaners; they are required/permitted for eligible roles, especially work with children/vulnerable adults or specific regulated sites.</li>
+          <li>Record DBS status, certificate/reference, issue/renewal dates only where appropriate and lawful.</li>
+          <li>Follow data protection rules: keep only what is necessary and retain securely.</li>
+        </ul>
+        <a href="{% url 'employee_list' %}" class="btn btn-outline-purple btn-sm">Manage DBS records</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="panel h-100"><div class="panel-head"><div><h3 class="panel-title">Health & Safety / COSHH / PPE</h3><p class="panel-sub">HSE cleaning business duties</p></div></div>
+      <div class="panel-body">
+        <ul>
+          <li>Provide H&S induction, training, supervision, and risk assessments for cleaning tasks.</li>
+          <li>For chemicals: complete COSHH assessments, keep SDS accessible, label containers, store safely, and train staff.</li>
+          <li>Provide suitable PPE and maintain equipment. Record training/PPE/risk assessment acknowledgements.</li>
+        </ul>
+        <div class="d-flex gap-2 flex-wrap">
+          <a href="{% url 'stock_list' %}" class="btn btn-outline-purple btn-sm">Stock/COSHH</a>
+          <a href="{% url 'equipment_list' %}" class="btn btn-outline-purple btn-sm">Equipment</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="panel h-100"><div class="panel-head"><div><h3 class="panel-title">Equipment safety (PUWER / Electrical)</h3><p class="panel-sub">Vacuums, scrubbers, electrical machines</p></div></div>
+      <div class="panel-body">
+        <ul>
+          <li>PUWER: equipment must be suitable, safe, maintained, inspected where risk requires, and used by trained people.</li>
+          <li>Electrical equipment should be maintained; inspect visually and carry out PAT/testing where appropriate by risk assessment.</li>
+          <li>Quarantine unsafe equipment until repaired/replaced. Keep service/inspection records.</li>
+        </ul>
+        <a href="{% url 'equipment_list' %}" class="btn btn-outline-purple btn-sm">Equipment register</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel mt-3">
+  <div class="panel-head"><div><h3 class="panel-title">Current employee compliance snapshot</h3><p class="panel-sub">Quick operational view; complete details on employee records</p></div></div>
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead><tr><th>Employee</th><th>Right to work</th><th>DBS</th><th>H&S basics</th><th>Warnings</th></tr></thead>
+      <tbody>
+        {% for e in employees %}
+        <tr>
+          <td><strong>{{ e.full_name }}</strong></td>
+          <td><span class="badge-status {% if e.right_to_work_ok %}badge-status-green{% else %}badge-status-red{% endif %}"><span class="dot"></span>{{ e.get_right_to_work_status_display }}</span></td>
+          <td><span class="badge-status {% if e.dbs_ok %}badge-status-green{% else %}badge-status-amber{% endif %}"><span class="dot"></span>{{ e.get_dbs_status_display }}</span></td>
+          <td><span class="badge-status {% if e.has_health_safety_basics %}badge-status-green{% else %}badge-status-amber{% endif %}"><span class="dot"></span>{% if e.has_health_safety_basics %}Complete{% else %}Incomplete{% endif %}</span></td>
+          <td>{% if e.compliance_warnings %}<span class="text-danger small">{{ e.compliance_warnings|join:", " }}</span>{% else %}<span class="text-muted-dark">—</span>{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5"><div class="empty-compact"><i class="bi bi-shield-check"></i><p>No employees.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

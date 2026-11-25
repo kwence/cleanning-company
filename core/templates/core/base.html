@@ -1,0 +1,178 @@
+{% load static form_tags %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CleanSweep - manage cleaning jobs, staff, shifts, time tracking and payroll.">
+  <link rel="icon" href="{% static 'cleaning/favicon.svg' %}" type="image/svg+xml">
+  <title>{% block title %}CleanSweep{% endblock %} · CleanSweep Cleaning Co.</title>
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.min.css' %}">
+  <link rel="stylesheet" href="{% static 'cleaning/css/theme.css' %}">
+</head>
+<body class="{% if not user.is_authenticated %}auth-body{% endif %}">
+{% if user.is_authenticated %}
+  {% with nav_name=request.resolver_match.url_name %}
+  <div class="app-shell">
+    <aside class="sidebar d-none d-lg-flex">
+      <a href="{% url 'dashboard' %}" class="brand">
+        <span class="brand-mark"><i class="bi bi-stars"></i></span>
+        <span class="brand-text">CleanSweep<small>CLEANING CO.</small></span>
+      </a>
+
+      <div class="sidebar-label">WORKSPACE</div>
+      <nav class="sidebar-nav">
+        <a href="{% url 'dashboard' %}" class="nav-link {% if nav_name == 'dashboard' %}active{% endif %}">
+          <i class="bi bi-grid-1x2"></i><span>Dashboard</span>
+        </a>
+        <a href="{% url 'client_list' %}" class="nav-link {% if nav_name == 'client' or nav_name == 'client_form' or nav_name == 'client_delete' %}active{% endif %}">
+          <i class="bi bi-building"></i><span>Clients</span>
+        </a>
+        <a href="{% url 'employee_list' %}" class="nav-link {% if nav_name == 'employee' or nav_name == 'employee_form' or nav_name == 'employee_delete' %}active{% endif %}">
+          <i class="bi bi-people"></i><span>Employees</span>
+        </a>
+        <a href="{% url 'shift_list' %}" class="nav-link {% if nav_name == 'shift' %}active{% endif %}">
+          <i class="bi bi-calendar-week"></i><span>Shifts</span>
+        </a>
+        <a href="{% url 'timeclock_home' %}" class="nav-link {% if nav_name == 'timeclock' or nav_name == 'time_entry' %}active{% endif %}">
+          <i class="bi bi-clock-history"></i><span>Timeclock</span>
+        </a>
+        <a href="{% url 'badge_list' %}" class="nav-link {% if nav_name == 'badge' %}active{% endif %}">
+          <i class="bi bi-credit-card-2"></i><span>Badges</span>
+        </a>
+        <a href="{% url 'task_list' %}" class="nav-link {% if nav_name == 'task' %}active{% endif %}">
+          <i class="bi bi-check2-square"></i><span>Tasks</span>
+        </a>
+        <a href="{% url 'stock_list' %}" class="nav-link {% if 'stock' in nav_name or nav_name == 'inventory' %}active{% endif %}">
+          <i class="bi bi-box-seam"></i><span>Stock</span>
+        </a>
+        <a href="{% url 'equipment_list' %}" class="nav-link {% if 'equipment' in nav_name %}active{% endif %}">
+          <i class="bi bi-tools"></i><span>Equipment</span>
+        </a>
+        <a href="{% url 'payroll_home' %}" class="nav-link {% if nav_name == 'payroll' or nav_name == 'payslip' or nav_name == 'payroll_config' %}active{% endif %}">
+          <i class="bi bi-cash-coin"></i><span>Payroll</span>
+        </a>
+        <a href="{% url 'accounting_payment_list' %}" class="nav-link {% if nav_name == 'accounting' %}active{% endif %}">
+          <i class="bi bi-journal-check"></i><span>Accounting</span>
+        </a>
+        <a href="{% url 'banking_home' %}" class="nav-link {% if nav_name == 'banking_home' %}active{% endif %}">
+          <i class="bi bi-bank2"></i><span>Bank payments</span>
+        </a>
+        <a href="{% url 'compliance' %}" class="nav-link {% if nav_name == 'compliance' %}active{% endif %}">
+          <i class="bi bi-shield-check"></i><span>Compliance</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-tip">
+        <i class="bi bi-lightbulb"></i>
+        <p><strong>Sparkling results.</strong><br>Book shifts, track time and keep payroll tidy.</p>
+      </div>
+
+      <div class="sidebar-user mt-auto">
+        <span class="avatar">{{ user.username|slice:":1"|upper }}</span>
+        <span class="user-meta"><strong>{{ user.username }}</strong><small>{{ user.email|truncatechars:22 }}</small></span>
+        <form action="{% url 'logout' %}" method="post" class="ms-auto">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-icon" title="Sign out" aria-label="Sign out"><i class="bi bi-box-arrow-right"></i></button>
+        </form>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="topbar">
+        <button class="btn btn-icon d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileNav" aria-controls="mobileNav" aria-label="Open menu">
+          <i class="bi bi-list fs-4"></i>
+        </button>
+        <div class="me-auto">
+          <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+          <div class="page-subtitle">{% block page_subtitle %}Clean operations at a glance{% endblock %}</div>
+        </div>
+        {% block page_actions %}{% endblock %}
+      </header>
+
+      <main class="content">
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags|alert_class }} alert-dismissible fade show soft-alert" role="alert">
+              <i class="bi bi-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-triangle{% elif message.tags == 'info' %}info-circle{% else %}bell{% endif %} me-2"></i>{{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+        {% block page_content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <div class="offcanvas offcanvas-start mobile-nav" tabindex="-1" id="mobileNav" aria-labelledby="mobileNavLabel">
+    <div class="offcanvas-header">
+      <a href="{% url 'dashboard' %}" class="brand">
+        <span class="brand-mark"><i class="bi bi-stars"></i></span>
+        <span class="brand-text">CleanSweep</span>
+      </a>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <nav class="sidebar-nav">
+        <a href="{% url 'dashboard' %}" class="nav-link {% if nav_name == 'dashboard' %}active{% endif %}"><i class="bi bi-grid-1x2"></i><span>Dashboard</span></a>
+        <a href="{% url 'client_list' %}" class="nav-link {% if nav_name == 'client' or nav_name == 'client_form' or nav_name == 'client_delete' %}active{% endif %}"><i class="bi bi-building"></i><span>Clients</span></a>
+        <a href="{% url 'employee_list' %}" class="nav-link {% if nav_name == 'employee' or nav_name == 'employee_form' or nav_name == 'employee_delete' %}active{% endif %}"><i class="bi bi-people"></i><span>Employees</span></a>
+        <a href="{% url 'shift_list' %}" class="nav-link {% if nav_name == 'shift' %}active{% endif %}"><i class="bi bi-calendar-week"></i><span>Shifts</span></a>
+        <a href="{% url 'timeclock_home' %}" class="nav-link {% if nav_name == 'timeclock' or nav_name == 'time_entry' %}active{% endif %}"><i class="bi bi-clock-history"></i><span>Timeclock</span></a>
+        <a href="{% url 'badge_list' %}" class="nav-link {% if nav_name == 'badge' %}active{% endif %}"><i class="bi bi-credit-card-2"></i><span>Badges</span></a>
+        <a href="{% url 'task_list' %}" class="nav-link {% if nav_name == 'task' %}active{% endif %}"><i class="bi bi-check2-square"></i><span>Tasks</span></a>
+        <a href="{% url 'stock_list' %}" class="nav-link {% if 'stock' in nav_name or nav_name == 'inventory' %}active{% endif %}"><i class="bi bi-box-seam"></i><span>Stock</span></a>
+        <a href="{% url 'equipment_list' %}" class="nav-link {% if 'equipment' in nav_name %}active{% endif %}"><i class="bi bi-tools"></i><span>Equipment</span></a>
+        <a href="{% url 'payroll_home' %}" class="nav-link {% if nav_name == 'payroll' or nav_name == 'payslip' or nav_name == 'payroll_config' %}active{% endif %}"><i class="bi bi-cash-coin"></i><span>Payroll</span></a>
+        <a href="{% url 'accounting_payment_list' %}" class="nav-link {% if nav_name == 'accounting' %}active{% endif %}"><i class="bi bi-journal-check"></i><span>Accounting</span></a>
+        <a href="{% url 'banking_home' %}" class="nav-link {% if nav_name == 'banking_home' %}active{% endif %}"><i class="bi bi-bank2"></i><span>Bank payments</span></a>
+        <a href="{% url 'compliance' %}" class="nav-link {% if nav_name == 'compliance' %}active{% endif %}"><i class="bi bi-shield-check"></i><span>Compliance</span></a>
+      </nav>
+      <div class="sidebar-user mt-auto">
+        <span class="avatar">{{ user.username|slice:":1"|upper }}</span>
+        <span class="user-meta"><strong>{{ user.username }}</strong><small>{{ user.email|truncatechars:22 }}</small></span>
+        <form action="{% url 'logout' %}" method="post" class="ms-auto">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-icon" title="Sign out" aria-label="Sign out"><i class="bi bi-box-arrow-right"></i></button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endwith %}
+{% else %}
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <div class="auth-aside d-none d-md-flex flex-column">
+        <a href="{% url 'login' %}" class="brand brand-light">
+          <span class="brand-mark"><i class="bi bi-stars"></i></span>
+          <span class="brand-text">CleanSweep</span>
+        </a>
+        <div class="auth-aside-copy">
+          <span class="eyebrow">SPARKLING CLEAN</span>
+          <h2>Grow your cleaning<br>business.</h2>
+          <p>Book jobs, manage crews, track time on the clock and run payroll — all in one purple place.</p>
+          <ul class="auth-features">
+            <li><i class="bi bi-check2-circle"></i> Client &amp; job management</li>
+            <li><i class="bi bi-check2-circle"></i> Shift scheduling &amp; time tracking</li>
+            <li><i class="bi bi-check2-circle"></i> UK payroll with payslips by email</li>
+          </ul>
+        </div>
+        <div class="auth-leaves" aria-hidden="true"><i class="bi bi-stars"></i><i class="bi bi-stars"></i><i class="bi bi-stars"></i></div>
+      </div>
+      <div class="auth-panel">
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags|alert_class }} soft-alert" role="alert">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+        {% block auth_content %}{% endblock %}
+      </div>
+    </div>
+    <p class="auth-footer">CleanSweep · A demo cleaning company management app built with Django + Bootstrap 5</p>
+  </div>
+{% endif %}
+
+<script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

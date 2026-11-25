@@ -1,0 +1,163 @@
+{% extends "core/base.html" %}
+{% load form_tags %}
+
+{% block page_title %}{% if employee %}Edit employee{% else %}Add employee{% endif %}{% endblock %}
+{% block page_subtitle %}Staff contracts, rates and certifications{% endblock %}
+{% block page_content %}
+  <div class="panel" style="max-width: 900px;">
+    <div class="panel-head">
+      <div>
+        <h3 class="panel-title">{% if employee %}Edit {{ employee.full_name }}{% else %}New employee{% endif %}</h3>
+        <p class="panel-sub">Pay rate, contract status and bank details for UK PAYE</p>
+      </div>
+    </div>
+    <div class="panel-body">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="{{ form.full_name.id_for_label }}" class="form-label">Full name *</label>
+            {{ form.full_name|bootstrap_field }}
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+            {{ form.email|bootstrap_field }}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="{{ form.phone.id_for_label }}" class="form-label">Phone</label>
+            {{ form.phone|bootstrap_field }}
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="{{ form.address.id_for_label }}" class="form-label">Address</label>
+            {{ form.address|bootstrap_field }}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label for="{{ form.job_role.id_for_label }}" class="form-label">Job role</label>
+            {{ form.job_role|bootstrap_field }}
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="{{ form.hourly_rate.id_for_label }}" class="form-label">Hourly rate (£) *</label>
+            {{ form.hourly_rate|bootstrap_field }}
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="{{ form.employment_status.id_for_label }}" class="form-label">Employment status</label>
+            {{ form.employment_status|bootstrap_field }}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4 mb-4 mb-md-0">
+            <label for="{{ form.start_date.id_for_label }}" class="form-label">Start date</label>
+            {{ form.start_date|bootstrap_field }}
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="{{ form.ni_number.id_for_label }}" class="form-label">National Insurance number</label>
+            {{ form.ni_number|bootstrap_field }}
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="{{ form.tax_code.id_for_label }}" class="form-label">HMRC tax code</label>
+            {{ form.tax_code|bootstrap_field }}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="{{ form.bank_sort_code.id_for_label }}" class="form-label">Bank sort code</label>
+            {{ form.bank_sort_code|bootstrap_field }}
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="{{ form.bank_account_number.id_for_label }}" class="form-label">Bank account number</label>
+            {{ form.bank_account_number|bootstrap_field }}
+          </div>
+        </div>
+
+        <hr>
+        <h4 class="mt-0">UK compliance checks</h4>
+        <div class="alert alert-warning soft-alert">
+          <strong>Right to work:</strong> Complete a Home Office right-to-work check before employment starts and keep evidence/follow-up dates as required. Do not employ anyone who does not have the right to do the work offered. This app stores references/dates only—follow your GDPR/data retention policy.
+        </div>
+        <div class="row">
+          <div class="col-md-4 mb-3"><label class="form-label">Right to work status</label>{{ form.right_to_work_status|bootstrap_field }}</div>
+          <div class="col-md-4 mb-3"><label class="form-label">Check date</label>{{ form.right_to_work_check_date|bootstrap_field }}</div>
+          <div class="col-md-4 mb-3"><label class="form-label">Expiry/follow-up date</label>{{ form.right_to_work_expiry_date|bootstrap_field }}</div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3"><label class="form-label">Document/share code reference</label>{{ form.right_to_work_document_ref|bootstrap_field }}</div>
+          <div class="col-md-6 mb-3"><label class="form-label">RTW notes</label>{{ form.right_to_work_notes|bootstrap_field }}</div>
+        </div>
+
+        <div class="alert alert-info soft-alert">
+          <strong>DBS:</strong> Only request DBS checks where the role/site/client legally requires or permits them (e.g., certain work in schools/care settings). Record status and renewal dates.
+        </div>
+        <div class="row">
+          <div class="col-md-3 mb-3"><label class="form-label">DBS status</label>{{ form.dbs_status|bootstrap_field }}</div>
+          <div class="col-md-3 mb-3"><label class="form-label">DBS certificate no.</label>{{ form.dbs_certificate_number|bootstrap_field }}</div>
+          <div class="col-md-3 mb-3"><label class="form-label">Issue date</label>{{ form.dbs_issue_date|bootstrap_field }}</div>
+          <div class="col-md-3 mb-3"><label class="form-label">Expiry/renewal date</label>{{ form.dbs_expiry_date|bootstrap_field }}</div>
+        </div>
+        <div class="mb-3"><label class="form-label">DBS notes</label>{{ form.dbs_notes|bootstrap_field }}</div>
+
+        <h4>Health & safety / training</h4>
+        <div class="alert alert-info soft-alert">
+          <strong>H&S:</strong> Cleaning businesses should provide induction, health & safety training, COSHH information/instruction where relevant, risk assessment communication, and suitable PPE under HSE guidance and applicable regulations.
+        </div>
+        <div class="row">
+          <div class="col-md-4 mb-3"><label class="form-label">Induction completed</label>{{ form.induction_completed_date|bootstrap_field }}</div>
+          <div class="col-md-4 mb-3"><label class="form-label">H&S training</label>{{ form.health_safety_training_date|bootstrap_field }}</div>
+          <div class="col-md-4 mb-3"><label class="form-label">COSHH training</label>{{ form.coshh_training_date|bootstrap_field }}</div>
+        </div>
+        <div class="row">
+          <div class="col-md-4 mb-3"><label class="form-label">Risk assessment acknowledged</label>{{ form.risk_assessment_ack_date|bootstrap_field }}</div>
+          <div class="col-md-4 mb-3"><label class="form-label">PPE provided</label>{{ form.ppe_provided_date|bootstrap_field }}</div>
+          <div class="col-md-4 mb-3"><label class="form-label">Emergency contact</label>{{ form.emergency_contact_name|bootstrap_field }}</div>
+        </div>
+        <div class="mb-3"><label class="form-label">Emergency contact phone</label>{{ form.emergency_contact_phone|bootstrap_field }}</div>
+
+        {% if formset %}
+          <hr>
+          <h4 class="mt-0">Certifications</h4>
+          <p class="text-muted-dark" style="font-size: .78rem;">COSHH, DBS checks and other compliance certificates. Expiry is tracked automatically for payroll compliance.</p>
+          {{ formset.management_form }}
+          {% for cert_form in formset %}
+            <div class="row cert-row border rounded p-2 mb-2 bg-light-purple">
+              {{ cert_form.id }}
+              {% if cert_form.non_field_errors %}<div class="col-12 text-danger small mb-2">{{ cert_form.non_field_errors }}</div>{% endif %}
+              <div class="col-md-3 mb-2 mb-md-0">
+                <label class="form-label" for="{{ cert_form.name.id_for_label }}">{{ cert_form.name.label }}</label>
+                {{ cert_form.name|bootstrap_field }}
+              </div>
+              <div class="col-md-3 mb-2 mb-md-0">
+                <label class="form-label" for="{{ cert_form.certification_type.id_for_label }}">{{ cert_form.certification_type.label }}</label>
+                {{ cert_form.certification_type|bootstrap_field }}
+              </div>
+              <div class="col-md-3 mb-2 mb-md-0">
+                <label class="form-label" for="{{ cert_form.issuing_body.id_for_label }}">{{ cert_form.issuing_body.label }}</label>
+                {{ cert_form.issuing_body|bootstrap_field }}
+              </div>
+              <div class="col-md-3 mb-2 mb-md-0">
+                <label class="form-label" for="{{ cert_form.credential_id.id_for_label }}">{{ cert_form.credential_id.label }}</label>
+                {{ cert_form.credential_id|bootstrap_field }}
+              </div>
+              <div class="col-md-3 mb-2 mb-md-0">
+                <label class="form-label" for="{{ cert_form.issue_date.id_for_label }}">{{ cert_form.issue_date.label }}</label>
+                {{ cert_form.issue_date|bootstrap_field }}
+              </div>
+              <div class="col-md-3 mb-2 mb-md-0">
+                <label class="form-label" for="{{ cert_form.expiry_date.id_for_label }}">{{ cert_form.expiry_date.label }}</label>
+                {{ cert_form.expiry_date|bootstrap_field }}
+              </div>
+            </div>
+          {% endfor %}
+          <p class="text-muted-dark" style="font-size: .75rem;">Existing certificates can be edited inline above. New certificates for brand-new employees should be added from the employee list.</p>
+        {% endif %}
+
+        <div class="d-flex gap-2 mt-3">
+          <button type="submit" class="btn btn-purple">Save employee</button>
+          <a href="{% url 'employee_list' %}" class="btn btn-light-purple">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

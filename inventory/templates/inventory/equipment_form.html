@@ -1,0 +1,43 @@
+{% extends "core/base.html" %}
+{% load form_tags %}
+
+{% block page_title %}{% if equipment %}Edit equipment{% else %}Add equipment{% endif %}{% endblock %}
+{% block page_subtitle %}Electric machine register with UK safety checks{% endblock %}
+{% block page_content %}
+<div class="panel" style="max-width: 980px;">
+  <div class="panel-head"><div><h3 class="panel-title">{% if equipment %}Edit {{ equipment.name }}{% else %}New equipment{% endif %}</h3><p class="panel-sub">PUWER, inspection, PAT and safe-use records.</p></div></div>
+  <div class="panel-body">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-5 mb-3"><label class="form-label">Name *</label>{{ form.name|bootstrap_field }}</div>
+        <div class="col-md-3 mb-3"><label class="form-label">Type</label>{{ form.equipment_type|bootstrap_field }}</div>
+        <div class="col-md-4 mb-3"><label class="form-label">Asset tag *</label>{{ form.asset_tag|bootstrap_field }}</div>
+      </div>
+      <div class="row">
+        <div class="col-md-4 mb-3"><label class="form-label">Serial number</label>{{ form.serial_number|bootstrap_field }}</div>
+        <div class="col-md-4 mb-3"><label class="form-label">Location</label>{{ form.location|bootstrap_field }}</div>
+        <div class="col-md-4 mb-3"><label class="form-label">Assigned to</label>{{ form.assigned_to|bootstrap_field }}</div>
+      </div>
+      <div class="row">
+        <div class="col-md-4 mb-3"><label class="form-label">Status</label>{{ form.status|bootstrap_field }}</div>
+        <div class="col-md-4 mb-3"><label class="form-label">Purchase date</label>{{ form.purchase_date|bootstrap_field }}</div>
+        <div class="col-md-4 mb-3"><label class="form-label">Safe to use</label><div class="form-check mt-2">{{ form.is_safe_to_use }} <label class="form-check-label" for="{{ form.is_safe_to_use.id_for_label }}">Equipment is safe to use</label></div></div>
+      </div>
+      <div class="row">
+        <div class="col-md-3 mb-3"><label class="form-label">Last service</label>{{ form.last_service_date|bootstrap_field }}</div>
+        <div class="col-md-3 mb-3"><label class="form-label">Next service</label>{{ form.next_service_date|bootstrap_field }}</div>
+        <div class="col-md-3 mb-3"><label class="form-label">PAT test date</label>{{ form.pat_test_date|bootstrap_field }}</div>
+        <div class="col-md-3 mb-3"><label class="form-label">PAT due date</label>{{ form.pat_due_date|bootstrap_field }}</div>
+      </div>
+      <div class="row">
+        <div class="col-md-4 mb-3"><label class="form-label">Risk assessment date</label>{{ form.risk_assessment_date|bootstrap_field }}</div>
+        <div class="col-md-4 mb-3"><label class="form-label">PUWER inspection date</label>{{ form.puwer_inspection_date|bootstrap_field }}</div>
+      </div>
+      <div class="mb-3"><label class="form-label">Notes / defects / actions</label>{{ form.notes|bootstrap_field }}</div>
+      <div class="alert alert-warning soft-alert"><strong>PUWER/Electricity at Work:</strong> Equipment must be suitable, maintained, inspected where risk requires, and used by trained staff. Remove unsafe equipment from service and quarantine until repaired.</div>
+      <div class="d-flex gap-2"><button class="btn btn-purple" type="submit">Save equipment</button><a href="{% url 'equipment_list' %}" class="btn btn-light-purple">Cancel</a></div>
+    </form>
+  </div>
+</div>
+{% endblock %}

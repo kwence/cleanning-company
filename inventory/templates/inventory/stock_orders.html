@@ -1,0 +1,64 @@
+{% extends "core/base.html" %}
+{% load form_tags money %}
+
+{% block page_title %}Stock Orders{% endblock %}
+{% block page_subtitle %}Order cleaning products and receive them into stock{% endblock %}
+{% block page_actions %}
+  <a href="{% url 'stock_list' %}" class="btn btn-outline-purple">Stock items</a>
+  <a href="{% url 'stock_movements' %}" class="btn btn-outline-purple">Movements</a>
+{% endblock %}
+{% block page_content %}
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="panel">
+      <div class="panel-head"><div><h3 class="panel-title">Order form</h3><p class="panel-sub">Create supplier order</p></div></div>
+      <div class="panel-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          <div class="mb-3"><label class="form-label">Item</label>{{ form.item|bootstrap_field }}</div>
+          <div class="mb-3"><label class="form-label">Supplier</label>{{ form.supplier|bootstrap_field }}</div>
+          <div class="row"><div class="col-md-6 mb-3"><label class="form-label">Quantity</label>{{ form.quantity|bootstrap_field }}</div><div class="col-md-6 mb-3"><label class="form-label">Unit cost (£)</label>{{ form.unit_cost|bootstrap_field }}</div></div>
+          <div class="row"><div class="col-md-6 mb-3"><label class="form-label">Order date</label>{{ form.order_date|bootstrap_field }}</div><div class="col-md-6 mb-3"><label class="form-label">Expected</label>{{ form.expected_date|bootstrap_field }}</div></div>
+          <div class="row"><div class="col-md-6 mb-3"><label class="form-label">Status</label>{{ form.status|bootstrap_field }}</div><div class="col-md-6 mb-3"><label class="form-label">Received date</label>{{ form.received_date|bootstrap_field }}</div></div>
+          <div class="mb-3"><label class="form-label">Reference</label>{{ form.reference|bootstrap_field }}</div>
+          <div class="mb-3"><label class="form-label">Notes</label>{{ form.notes|bootstrap_field }}</div>
+          <div class="text-muted-dark mb-3" style="font-size:.72rem;">Marking as Received auto-creates a stock-in movement.</div>
+          <button class="btn btn-purple w-100" type="submit">Save order</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="panel">
+      <div class="panel-head"><div><h3 class="panel-title">Orders</h3><p class="panel-sub">Purchase and receiving history</p></div></div>
+      <div class="panel-body filter-bar">
+        <form method="get" class="row g-3 align-items-end"><div class="col-md-4"><label class="form-label">Status</label><select name="status" class="form-select"><option value="">All</option>{% for v,l in statuses %}<option value="{{ v }}" {% if selected_status == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div><div class="col-md-2"><button class="btn btn-outline-purple w-100">Filter</button></div></form>
+      </div>
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>Date</th><th>Item</th><th>Supplier</th><th class="text-end">Qty</th><th class="text-end">Total</th><th>Status</th><th class="text-end">Action</th></tr></thead>
+          <tbody>
+            {% for o in orders %}
+            <tr>
+              <td class="nowrap">{{ o.order_date|date:"d M Y" }}<div class="text-muted-dark" style="font-size:.72rem;">{{ o.reference|default:"" }}</div></td>
+              <td>{{ o.item.name }}</td>
+              <td>{{ o.supplier|default:o.item.supplier|default:"—" }}</td>
+              <td class="text-end">{{ o.quantity }}</td>
+              <td class="text-end">{% money o.total_cost %}</td>
+              <td><span class="badge-status {% if o.status == 'received' %}badge-status-green{% elif o.status == 'ordered' %}badge-status-amber{% elif o.status == 'cancelled' %}badge-status-red{% else %}badge-status-grey{% endif %}"><span class="dot"></span>{{ o.get_status_display }}</span></td>
+              <td class="text-end">
+                {% if o.status != 'received' and o.status != 'cancelled' %}
+                <form method="post" action="{% url 'stock_order_receive' o.pk %}" class="d-inline">{% csrf_token %}<button class="btn btn-sm btn-outline-purple">Receive</button></form>
+                {% else %}<span class="text-muted-dark">—</span>{% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7"><div class="empty-compact"><i class="bi bi-cart-check"></i><p>No orders yet.</p></div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

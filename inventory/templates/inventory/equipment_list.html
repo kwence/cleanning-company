@@ -1,0 +1,53 @@
+{% extends "core/base.html" %}
+
+{% block page_title %}Equipment{% endblock %}
+{% block page_subtitle %}Electric cleaning machines: vacuums, scrubbers and UK safety checks{% endblock %}
+{% block page_actions %}
+  <a href="{% url 'equipment_create' %}" class="btn btn-purple"><i class="bi bi-plus-circle me-1"></i>Add equipment</a>
+{% endblock %}
+{% block page_content %}
+<div class="panel mb-3">
+  <div class="panel-body">
+    <div class="alert alert-info soft-alert mb-0">
+      <strong>UK safety:</strong> Manage electric equipment under PUWER (safe, maintained, suitable, inspected) and Electricity at Work/HSE guidance. Keep PAT/inspection records as appropriate, quarantine unsafe equipment, and ensure users are trained.
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-head">
+    <div><h3 class="panel-title">Equipment register</h3><p class="panel-sub">{{ equipment|length }} item(s) · {{ attention_count }} needing attention</p></div>
+  </div>
+  <div class="panel-body filter-bar">
+    <form method="get" class="row g-3 align-items-end">
+      <div class="col-md-5"><label class="form-label">Search</label><input type="search" name="q" class="form-control" value="{{ q }}" placeholder="Equipment name..."></div>
+      <div class="col-md-4"><label class="form-label">Status</label><select name="status" class="form-select"><option value="">All statuses</option>{% for v,l in statuses %}<option value="{{ v }}" {% if status == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+      <div class="col-md-3"><button class="btn btn-outline-purple w-100">Filter</button></div>
+    </form>
+  </div>
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead><tr><th>Equipment</th><th>Type</th><th>Assigned</th><th>Service</th><th>PAT</th><th>PUWER/Risk</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+      <tbody>
+        {% for e in equipment %}
+        <tr>
+          <td><strong>{{ e.name }}</strong><div class="text-muted-dark" style="font-size:.72rem;">{{ e.asset_tag }}{% if e.serial_number %} · SN {{ e.serial_number }}{% endif %}{% if e.location %} · {{ e.location }}{% endif %}</div></td>
+          <td>{{ e.get_equipment_type_display }}</td>
+          <td>{{ e.assigned_to.full_name|default:"—" }}</td>
+          <td class="nowrap">{% if e.next_service_date %}{{ e.next_service_date|date:"d M Y" }}{% else %}—{% endif %}{% if e.is_service_overdue %}<div><span class="badge-status badge-status-red"><span class="dot"></span>Overdue</span></div>{% endif %}</td>
+          <td class="nowrap">{% if e.pat_due_date %}{{ e.pat_due_date|date:"d M Y" }}{% else %}—{% endif %}{% if e.is_pat_overdue %}<div><span class="badge-status badge-status-red"><span class="dot"></span>PAT overdue</span></div>{% endif %}</td>
+          <td class="nowrap"><div style="font-size:.72rem;">PUWER: {{ e.puwer_inspection_date|date:"d M Y"|default:"—" }}</div><div style="font-size:.72rem;">Risk: {{ e.risk_assessment_date|date:"d M Y"|default:"—" }}</div></td>
+          <td>
+            <span class="badge-status {% if e.status == 'available' %}badge-status-green{% elif e.status == 'in_use' %}badge-status-amber{% elif e.status == 'quarantine' or not e.is_safe_to_use %}badge-status-red{% else %}badge-status-grey{% endif %}"><span class="dot"></span>{{ e.get_status_display }}</span>
+            {% if not e.is_safe_to_use %}<div><span class="badge-status badge-status-red"><span class="dot"></span>Unsafe</span></div>{% endif %}
+          </td>
+          <td class="text-end"><a href="{% url 'equipment_edit' e.pk %}" class="btn btn-sm btn-outline-purple">Edit</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8"><div class="empty-compact"><i class="bi bi-tools"></i><p>No equipment registered.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

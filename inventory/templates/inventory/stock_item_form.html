@@ -1,0 +1,37 @@
+{% extends "core/base.html" %}
+{% load form_tags %}
+
+{% block page_title %}{% if item %}Edit stock item{% else %}Add stock item{% endif %}{% endblock %}
+{% block page_subtitle %}Cleaning stock with COSHH/SDS and storage controls{% endblock %}
+{% block page_content %}
+<div class="panel" style="max-width: 980px;">
+  <div class="panel-head"><div><h3 class="panel-title">{% if item %}Edit {{ item.name }}{% else %}New stock item{% endif %}</h3><p class="panel-sub">Track cleaning chemicals and supplies safely.</p></div></div>
+  <div class="panel-body">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-6 mb-3"><label class="form-label">Name *</label>{{ form.name|bootstrap_field }}</div>
+        <div class="col-md-3 mb-3"><label class="form-label">Category</label>{{ form.category|bootstrap_field }}</div>
+        <div class="col-md-3 mb-3"><label class="form-label">Unit</label>{{ form.unit|bootstrap_field }}</div>
+      </div>
+      <div class="row">
+        <div class="col-md-4 mb-3"><label class="form-label">SKU</label>{{ form.sku|bootstrap_field }}</div>
+        <div class="col-md-4 mb-3"><label class="form-label">Supplier</label>{{ form.supplier|bootstrap_field }}</div>
+        <div class="col-md-4 mb-3"><label class="form-label">Storage location</label>{{ form.location|bootstrap_field }}</div>
+      </div>
+      <div class="row">
+        <div class="col-md-3 mb-3"><label class="form-label">Minimum stock</label>{{ form.minimum_stock|bootstrap_field }}</div>
+        <div class="col-md-3 mb-3"><label class="form-label">Reorder qty</label>{{ form.reorder_quantity|bootstrap_field }}</div>
+        <div class="col-md-3 mb-3"><label class="form-label">COSHH required</label><div class="form-check mt-2">{{ form.coshh_required }} <label class="form-check-label" for="{{ form.coshh_required.id_for_label }}">Chemical needs COSHH/SDS</label></div></div>
+        <div class="col-md-3 mb-3"><label class="form-label">Active</label><div class="form-check mt-2">{{ form.is_active }} <label class="form-check-label" for="{{ form.is_active.id_for_label }}">Item active</label></div></div>
+      </div>
+      <div class="mb-3"><label class="form-label">SDS URL/reference</label>{{ form.sds_url|bootstrap_field }}</div>
+      <div class="mb-3"><label class="form-label">Hazard notes</label>{{ form.hazard_notes|bootstrap_field }}</div>
+      <div class="mb-3"><label class="form-label">PPE notes</label>{{ form.ppe_notes|bootstrap_field }}</div>
+      <div class="mb-3"><label class="form-label">Storage notes</label>{{ form.storage_notes|bootstrap_field }}</div>
+      <div class="alert alert-warning soft-alert"><strong>COSHH/HSE:</strong> Assess risks, keep SDS accessible, use correct labels/PPE, and train staff before using hazardous substances.</div>
+      <div class="d-flex gap-2"><button class="btn btn-purple" type="submit">Save stock item</button><a href="{% url 'stock_list' %}" class="btn btn-light-purple">Cancel</a></div>
+    </form>
+  </div>
+</div>
+{% endblock %}

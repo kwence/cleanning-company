@@ -1,0 +1,14 @@
+Dear {{ employee.full_name }},
+
+Please find your payslip for {{ period_label }}.
+
+Pay reference: {{ payslip.pay_reference }}
+Gross pay: £{{ payslip.gross_amount }}
+Overtime pay: £{{ payslip.overtime_pay }} ({{ payslip.overtime_hours }} hours at 1.5x)
+{% if payslip.cis_amount > 0 %}CIS deduction: -£{{ payslip.cis_amount }}
+{% endif %}Income tax: -£{{ payslip.tax_amount }}
+National Insurance: -£{{ payslip.ni_amount }}
+Net pay: £{{ payslip.net_amount }}
+
+Kind regards,
+CleanSweep Payroll

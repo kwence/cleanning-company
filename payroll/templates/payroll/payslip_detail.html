@@ -1,0 +1,91 @@
+{% extends "core/base.html" %}
+{% load money %}
+
+{% block page_title %}Payslip{% endblock %}
+{% block page_subtitle %}Pay breakdown for {{ payslip.employee.full_name }}{% endblock %}
+{% block page_actions %}
+  <button type="button" class="btn btn-outline-purple no-print" onclick="window.print()"><i class="bi bi-printer me-1"></i>Print</button>
+{% endblock %}
+{% block page_content %}
+  <div style="max-width: 780px; margin: 0 auto;">
+    <div class="payslip-sheet" id="payslip-sheet">
+      <div class="payslip-head">
+        <div>
+          <h3>CleanSweep Cleaning Co.</h3>
+          <div class="ref">Payslip {{ payslip.pay_reference }} · Period {{ payslip.period }}</div>
+        </div>
+        <span class="badge-status badge-status-{{ payslip.status|default:'grey' }}"><span class="dot"></span>{{ payslip.get_status_display }}</span>
+      </div>
+      <div class="payslip-body">
+        <div class="list-row">
+          <span class="text-muted-dark">Employee</span>
+          <span class="fw-bold">{{ payslip.employee.full_name }}</span>
+        </div>
+        <div class="list-row">
+          <span class="text-muted-dark">Job role</span>
+          <span>{{ payslip.employee.get_job_role_display }}</span>
+        </div>
+        <div class="list-row">
+          <span class="text-muted-dark">Tax year</span>
+          <span>{{ config.tax_year }}/{{ config.tax_year|add:1 }} (2025/26)</span>
+        </div>
+        <div class="payslip-row total-row">
+          <span class="k">Gross pay</span>
+          <span class="v">{% money payslip.gross_amount %}</span>
+        </div>
+        {% if payslip.overtime_pay > 0 %}
+          <div class="payslip-row">
+            <span class="k">Overtime ({{ payslip.overtime_hours|hours }}h @ 1.5×)</span>
+            <span class="v text-purpl">{% money payslip.overtime_pay %}</span>
+          </div>
+        {% endif %}
+        {% if payslip.cis_amount > 0 %}
+          <div class="payslip-row deduct">
+            <span class="k">CIS deduction (20%)</span>
+            <span class="v">–{% money payslip.cis_amount %}</span>
+          </div>
+        {% endif %}
+        <div class="payslip-row deduct">
+          <span class="k">Income tax</span>
+          <span class="v">–{% money payslip.tax_amount %}</span>
+        </div>
+        <div class="payslip-row deduct">
+          <span class="k">National Insurance</span>
+          <span class="v">–{% money payslip.ni_amount %}</span>
+        </div>
+        <div class="payslip-row total-row">
+          <span class="k">Net pay</span>
+          <span class="v">{% money payslip.net_amount %}</span>
+        </div>
+        <div class="payslip-row credit">
+          <span class="k">Employer NIC (13.8%)</span>
+          <span class="v">{% money payslip.employer_nic %}</span>
+        </div>
+      </div>
+      <div class="panel-footer d-flex justify-content-between align-items-center gap-3 flex-wrap no-print">
+        <span class="text-muted-dark" style="font-size: .78rem;">Net pay of {% money payslip.net_amount %} goes to {{ payslip.employee.bank_sort_code }} {{ payslip.employee.bank_account_number }}</span>
+        <div class="d-flex gap-2 flex-wrap">
+          <button type="button" class="btn btn-outline-purple" onclick="window.print()"><i class="bi bi-printer me-1"></i>Print</button>
+          {% if payslip.status == "draft" %}
+            <form method="post" action="{% url 'payslip_email' payslip.pk %}" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-purple">Issue &amp; email payslip</button>
+            </form>
+          {% endif %}
+          {% if payslip.status in "emailed paid" %}
+            <form method="post" action="{% url 'payslip_paid' payslip.pk %}" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline-purple">Mark as paid</button>
+            </form>
+          {% endif %}
+          <a href="{% url 'payroll_home' %}" class="btn btn-light-purple">Back to payroll</a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+{% block extra_scripts %}
+  {% if request.GET.print %}
+  <script>window.addEventListener('load', function () { window.print(); });</script>
+  {% endif %}
+{% endblock %}

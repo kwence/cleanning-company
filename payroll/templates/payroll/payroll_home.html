@@ -1,0 +1,122 @@
+{% extends "core/base.html" %}
+{% load money %}
+
+{% block page_title %}Payroll{% endblock %}
+{% block page_subtitle %}UK PAYE payroll runs, gross pay and net wages{% endblock %}
+{% block page_actions %}
+  <form method="post" action="{% url 'payroll_generate' %}" class="d-inline">
+    {% csrf_token %}
+    <input type="month" name="period" class="form-control form-control-sm d-inline-block w-auto" value="{{ period }}">
+    <button type="submit" class="btn btn-purple"><i class="bi bi-play-circle me-1"></i>Generate payroll</button>
+  </form>
+{% endblock %}
+{% block page_content %}
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h3 class="panel-title">Pay period {{ period }}</h3>
+        <p class="panel-sub">
+          {% if run %}
+            Status: <strong>{{ run.get_status_display }}</strong> · {{ run.payslip_count }} payslip(s)
+          {% else %}
+            No payroll run has been generated for this period yet.
+          {% endif %}
+        </p>
+      </div>
+      {% if run %}
+        <span class="badge-status badge-status-{{ run.status|default:'grey' }}"><span class="dot"></span>{{ run.get_status_display }}</span>
+      {% endif %}
+    </div>
+    <div class="panel-body">
+      <div class="grid grid-4">
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-icon"><i class="bi bi-cash-coin"></i></div></div>
+          <div class="stat-label">Gross wages</div>
+          <div class="stat-value">{% money run.gross_total %}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-icon"><i class="bi bi-percent"></i></div></div>
+          <div class="stat-label">Deductions (tax + NI)</div>
+          <div class="stat-value">–{% money run.deductions_total %}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-icon"><i class="bi bi-wallet2"></i></div></div>
+          <div class="stat-label">Net wages</div>
+          <div class="stat-value">{% money run.net_total %}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-icon"><i class="bi bi-building"></i></div></div>
+          <div class="stat-label">Employer NIC</div>
+          <div class="stat-value">{% money run.employer_nic_total %}</div>
+        </div>
+      </div>
+    </div>
+    {% if run %}
+      <div class="panel-footer d-flex justify-content-between align-items-center">
+        <span class="text-muted-dark" style="font-size: .8rem;">Generated {{ run.generated_at|date:"d M Y H:i" }}</span>
+        <form method="post" action="{% url 'payroll_generate' %}" class="d-inline">
+          {% csrf_token %}
+          <input type="month" name="period" class="form-control form-control-sm d-inline-block w-auto" value="{{ period }}">
+          <button type="submit" class="btn btn-outline-purple btn-sm">Regenerate</button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="panel" style="margin-top: 20px;">
+    <div class="panel-head">
+      <div>
+        <h3 class="panel-title">Recent payroll runs</h3>
+        <p class="panel-sub">Latest payroll periods</p>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead><tr><th>Period</th><th>Status</th><th class="text-end">Gross</th><th class="text-end">Net</th><th class="text-end">Payslips</th><th></th></tr></thead>
+        <tbody>
+          {% for r in recent_runs %}
+            <tr>
+              <td>{{ r.period }}</td>
+              <td><span class="badge-status badge-status-{{ r.status|default:'grey' }}"><span class="dot"></span>{{ r.get_status_display }}</span></td>
+              <td class="text-end">{% money r.gross_total %}</td>
+              <td class="text-end">{% money r.net_total %}</td>
+              <td class="text-end">{{ r.payslip_count }}</td>
+              <td class="text-end">
+                <button class="btn btn-sm btn-outline-purple" type="button" data-bs-toggle="collapse" data-bs-target="#run-{{ r.pk }}" aria-expanded="false" aria-controls="run-{{ r.pk }}">Payslips</button>
+              </td>
+            </tr>
+            <tr class="collapse" id="run-{{ r.pk }}">
+              <td colspan="6" class="p-0">
+                <div class="p-3 border-top bg-light-subtle">
+                  <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                      <thead><tr><th>Employee</th><th>Reference</th><th>Status</th><th class="text-end">Net</th><th class="text-end">Actions</th></tr></thead>
+                      <tbody>
+                        {% for payslip in r.payslips.all %}
+                          <tr>
+                            <td>{{ payslip.employee.full_name }}</td>
+                            <td>{{ payslip.pay_reference }}</td>
+                            <td><span class="badge-status badge-status-{{ payslip.status|default:'grey' }}"><span class="dot"></span>{{ payslip.get_status_display }}</span></td>
+                            <td class="text-end">{% money payslip.net_amount %}</td>
+                            <td class="text-end">
+                              <a href="{% url 'payslip' payslip.pk %}" class="btn btn-sm btn-light-purple">View</a>
+                              <a href="{% url 'payslip' payslip.pk %}?print=1" target="_blank" class="btn btn-sm btn-outline-purple"><i class="bi bi-printer"></i> Print</a>
+                            </td>
+                          </tr>
+                        {% empty %}
+                          <tr><td colspan="5" class="text-muted-dark">No payslips.</td></tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6"><div class="empty-compact"><i class="bi bi-cash-coin"></i><p>No payroll runs yet.</p></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

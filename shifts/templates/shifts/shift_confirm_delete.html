@@ -1,0 +1,18 @@
+{% extends "core/base.html" %}
+
+{% block page_title %}Delete shift{% endblock %}
+{% block page_subtitle %}This action cannot be undone{% endblock %}
+{% block page_content %}
+  <div class="panel confirm-card" style="max-width: 560px; margin: 0 auto;">
+    <div class="panel-body">
+      <div class="confirm-icon"><i class="bi bi-calendar2-x"></i></div>
+      <h3 class="confirm-title">Delete this shift?</h3>
+      <p class="confirm-text">The cleaning assignment will be permanently removed.</p>
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger-soft">Yes, delete shift</button>
+        <a href="{% url 'shift_list' %}" class="btn btn-light-purple ms-2">Cancel</a>
+      </form>
+    </div>
+  </div>
+{% endblock %}

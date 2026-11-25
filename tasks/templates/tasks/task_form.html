@@ -1,0 +1,56 @@
+{% extends "core/base.html" %}
+{% load form_tags %}
+
+{% block page_title %}{% if task %}Edit task{% else %}New task{% endif %}{% endblock %}
+{% block page_subtitle %}Cleaning task details{% endblock %}
+{% block page_content %}
+  <div class="panel" style="max-width: 780px;">
+    <div class="panel-head">
+      <div>
+        <h3 class="panel-title">{% if task %}Edit task{% else %}New task{% endif %}</h3>
+        <p class="panel-sub">Tasks tie together client, cleaner and shift</p>
+      </div>
+    </div>
+    <div class="panel-body">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="{{ form.client.id_for_label }}" class="form-label">Client *</label>
+            {{ form.client|bootstrap_field }}
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="{{ form.employee.id_for_label }}" class="form-label">Assigned employee</label>
+            {{ form.employee|bootstrap_field }}
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="{{ form.title.id_for_label }}" class="form-label">Title *</label>
+          {{ form.title|bootstrap_field }}
+        </div>
+        <div class="mb-3">
+          <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+          {{ form.description|bootstrap_field }}
+        </div>
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label for="{{ form.status.id_for_label }}" class="form-label">Status</label>
+            {{ form.status|bootstrap_field }}
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="{{ form.priority.id_for_label }}" class="form-label">Priority</label>
+            {{ form.priority|bootstrap_field }}
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="{{ form.due_date.id_for_label }}" class="form-label">Due date</label>
+            {{ form.due_date|bootstrap_field }}
+          </div>
+        </div>
+        <div class="d-flex gap-2 mt-2">
+          <button type="submit" class="btn btn-purple">Save task</button>
+          <a href="{% url 'task_list' %}" class="btn btn-light-purple">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

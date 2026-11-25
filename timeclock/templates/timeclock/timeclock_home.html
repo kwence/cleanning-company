@@ -1,0 +1,80 @@
+{% extends "core/base.html" %}
+{% load money %}
+
+{% block page_title %}Timeclock{% endblock %}
+{% block page_subtitle %}Clock in and out for cleaning staff{% endblock %}
+{% block page_content %}
+  <div class="grid" style="grid-template-columns: 1fr 2fr;">
+    <div>
+      <div class="clock-widget">
+        <div class="clock-face"><span><i class="bi bi-stopwatch"></i></span><small>ON SHIFT</small></div>
+        {% if open_entries %}
+          {% for entry in open_entries %}
+            <div class="shift-flag mb-2">
+              <i class="bi bi-person-badge"></i> {{ entry.employee.full_name }}
+            </div>
+            <p class="text-muted-dark mb-0">Clocked in at {{ entry.clock_in|date:"H:i" }}</p>
+            <p class="mb-3"><strong>{{ entry.duration_hours|hours }} hrs</strong> so far</p>
+            <form method="post" action="{% url 'time_entry_clock_out' entry.pk %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-purple btn-lg">
+                <i class="bi bi-stopwatch me-1"></i>Clock out
+              </button>
+            </form>
+          {% endfor %}
+        {% else %}
+          <p class="text-muted-dark">Nobody is currently on shift.</p>
+          <form method="post" action="{% url 'time_entry_clock_in' %}">
+            {% csrf_token %}
+            <div class="mb-2 text-start">
+              <label class="form-label" for="employee">Clock in employee</label>
+              <select id="employee" name="employee" class="form-select">
+                <option value="">Select employee…</option>
+                {% for employee in employees %}
+                  <option value="{{ employee.pk }}">{{ employee.full_name }} ({{ employee.get_job_role_display }})</option>
+                {% endfor %}
+              </select>
+            </div>
+            <button type="submit" class="btn btn-purple w-100">Clock in <i class="bi bi-arrow-down ms-1"></i></button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h3 class="panel-title">Today's entries</h3>
+          <p class="panel-sub">{{ today_entries|length }} entr(ies) recorded</p>
+        </div>
+      </div>
+      <div class="panel-body">
+        {% if today_entries %}
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead><tr><th>Employee</th><th>Clock in</th><th>Clock out</th><th>Duration</th><th>Approval</th></tr></thead>
+              <tbody>
+                {% for entry in today_entries %}
+                  <tr>
+                    <td>{{ entry.employee.full_name }}</td>
+                    <td class="nowrap">{{ entry.clock_in|date:"H:i" }}</td>
+                    <td class="nowrap">{{ entry.clock_out|date:"H:i"|default:"—" }}</td>
+                    <td>{{ entry.duration_hours|hours }} h</td>
+                    <td>
+                      {% if entry.approved %}
+                        <span class="badge-status badge-status-green"><span class="dot"></span>Approved</span>
+                      {% else %}
+                        <span class="badge-status badge-status-amber"><span class="dot"></span>Pending</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="empty-compact"><i class="bi bi-clock-history"></i><p>No time entries logged today.</p></div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
